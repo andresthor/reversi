@@ -1,0 +1,7 @@
+€}q(Ureversi]q(UNodeqU
+BOARD_SIZEqUReversiqUCUTOFF_DEPTHqUreUreversiboard]q(UReversiBoardqU
+test_boardq	Uaddq
+Uprint_boardqUBLACKqUWHITEqUEMPTYqeUgui]q(Urun_gameqUTILESqU
+draw_scoreqU	FONT_SIZEqU	blit_tileqUSCORE_POS_YqUSCORE_POS_XqU
+draw_boardqUPIECESqU	draw_tileqUdraw_piecesqUGLOBAL_OFFSETqU	draw_textqUDISPLAYqU	TILE_SIZEqUDISPLAY_WIDTHqU
+draw_pieceq U	get_inputq!UDISPLAY_HEIGHTq"eu.
