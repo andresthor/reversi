@@ -13,8 +13,11 @@ SCORE_POS_Y    = 1 * TILE_SIZE
 
 PIECES  = pygame.image.load('marbles.png')
 TILES   = pygame.image.load('marble.png')
+MOVES   = pygame.image.load('icons.png')
 DISPLAY = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 
+BLACK = 'X'
+WHITE = 'O'
 
 def run_game():
     pygame.init()
@@ -33,9 +36,11 @@ def run_game():
 
         DISPLAY.fill((212, 208, 200))
 
+        game.update()
         draw_board(game.board.size, game.board.size)
         draw_pieces(game)
         draw_score(game)
+        draw_moves(game)
         pygame.display.update()
         clock.tick(30)
 
@@ -45,10 +50,10 @@ def run_game():
 
 def draw_score(game):
     score = game.score
-    draw_text(str(score['black']),
+    draw_text(str(score[BLACK]),
               (SCORE_POS_X + TILE_SIZE + FONT_SIZE // 2,
                SCORE_POS_Y + FONT_SIZE // 2))
-    draw_text(str(score['white']),
+    draw_text(str(score[WHITE]),
               (SCORE_POS_X + TILE_SIZE + FONT_SIZE // 2,
                SCORE_POS_Y + FONT_SIZE // 2 + TILE_SIZE))
     draw_piece(SCORE_POS_X, SCORE_POS_Y, 'black')
@@ -74,6 +79,8 @@ def get_input(game):
     if click[0] == 1:
         if not game.try_move((col, row)):
             print('Not a valid move')
+    elif click[2] == 1:
+        game.alpha_beta_search()
 
 
 def draw_pieces(game):
@@ -85,6 +92,16 @@ def draw_pieces(game):
                 draw_piece(i * TILE_SIZE, j * TILE_SIZE, 'white')
             elif value is 'X':
                 draw_piece(i * TILE_SIZE, j * TILE_SIZE, 'black')
+
+
+def draw_moves(game):
+    moves   = game.board.valid_moves()
+    optimal = game.get_optimal_move()
+    for m in moves:
+        if m == optimal:
+            draw_move((m[0] - 1) * TILE_SIZE, (m[1] - 1) * TILE_SIZE, True)
+        else:
+            draw_move((m[0] - 1) * TILE_SIZE, (m[1] - 1) * TILE_SIZE)
 
 
 def draw_tile(posx, posy, t_type):
@@ -123,6 +140,15 @@ def draw_piece(posx, posy, color):
     elif color is 'white':
         DISPLAY.blit(PIECES, (posx + GLOBAL_OFFSET, posy + GLOBAL_OFFSET),
                      (2 * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE))
+
+
+def draw_move(posx, posy, is_optimal=False):
+    if is_optimal:
+         DISPLAY.blit(MOVES, (posx + GLOBAL_OFFSET + TILE_SIZE // 4, posy + GLOBAL_OFFSET + TILE_SIZE // 4),
+                      (2 * TILE_SIZE // 2, 2 * TILE_SIZE // 2, TILE_SIZE // 2, TILE_SIZE // 2))
+    else:
+        DISPLAY.blit(MOVES, (posx + GLOBAL_OFFSET + TILE_SIZE // 4, posy + GLOBAL_OFFSET + TILE_SIZE // 4),
+                     (TILE_SIZE // 2, 2 * TILE_SIZE // 2, TILE_SIZE // 2, TILE_SIZE // 2))
 
 
 def draw_board(cols, rows):

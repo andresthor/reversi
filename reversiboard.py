@@ -69,9 +69,7 @@ class ReversiBoard(object):
     def flips_in_dir(self, tile, direction):
         flips = []
         step  = add(tile, direction)
-
-        found_ally  = False
-        found_foe   = False
+        found_ally, found_foe = False, False
 
         while self.is_on_board(step) and self.get_tile(step) is not EMPTY:
             value = self.get_tile(step)
@@ -95,6 +93,15 @@ class ReversiBoard(object):
 
         return flips
 
+    def valid_moves(self):
+        moves = []
+        for i in range(self.size):
+            for j in range(self.size):
+                if self.valid_move((i + 1, j + 1)):
+                    moves.append((i + 1, j + 1))
+
+        return moves
+
     def opposite(self, color):
         # Assumes the only colors sent in are BLACK or WHITE
         opposite = BLACK if color is WHITE else WHITE
@@ -112,6 +119,7 @@ class ReversiBoard(object):
             self.do_flips(tile)
             self.switch_turns()
             self.last = tile
+            self.calc_score()
             return True
 
         return False
@@ -119,38 +127,45 @@ class ReversiBoard(object):
     def do_flips(self, tile):
         self.set_tiles(self.flips(tile), self.turn)
 
+    def board_full(self):
+        return sum(x.count(EMPTY) for x in self.board) == 0
 
-def add(t1, t2):
-    return (t1[0] + t2[0], t1[1] + t2[1])
+    def calc_score(self):
+        self.score[BLACK] = sum(x.count(BLACK) for x in self.board)
+        self.score[WHITE] = sum(x.count(WHITE) for x in self.board)
 
+    def ascii(self):
+        '''Accepts a 2D list of variable dimensions and prints the contents'''
 
-def print_board(board):
-    '''Accepts a 2D list of variable dimensions and prints the contents'''
+        cols, rows = len(self.board), len(self.board[0])
+        margin = '  ' if rows < 10 else '   '
 
-    cols, rows = len(board), len(board[0])
-    margin = '  ' if rows < 10 else '   '
-
-    # Print top
-    top = margin + ' '
-    for i in range(cols):
-        space = ' ' if i < 9 else ''
-        top += ' ' + str(i+1) + '.' + space
-    print(top)
-    print(margin + ' ' + cols * '+---' + '+')
-
-    # Print rows
-    for j in range(rows):
-        space = ' ' if j < 9 else ''
-        out = str(j+1) + '.' + space
+        # Print top
+        top = margin + ' '
         for i in range(cols):
-            out += '| ' + str(board[i][j]) + ' '
-        print(out + '|')
-        print(margin + space + cols * '+---' + '+')
+            space = ' ' if i < 9 else ''
+            top += ' ' + str(i+1) + '.' + space
+        print(top)
+        print(margin + ' ' + cols * '+---' + '+')
+
+        # Print rows
+        for j in range(rows):
+            space = ' ' if j < 9 else ''
+            out = str(j+1) + '.' + space
+            for i in range(cols):
+                out += '| ' + str(self.board[i][j]) + ' '
+            print(out + '|')
+            print(margin + space + cols * '+---' + '+')
 
 
 def test_board():
     board = ReversiBoard(8)
-    print_board(board.board)
+    board.ascii()
+
+
+def add(t1, t2):
+    return (t1[0] + t2[0], t1[1] + t2[1])
+
 
 if __name__ == '__main__':
     test_board()
