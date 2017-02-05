@@ -1,23 +1,15 @@
 #! /usr/bin/env python
 
+from constants import BLACK, WHITE, DISPLAY_HEIGHT, DISPLAY_WIDTH, GLOBAL_OFFSET
+from constants import SCORE_POS_X, SCORE_POS_Y, TILE_SIZE, FONT_SIZE, ICON_SIZE
 import pygame
 from reversi import Reversi
-
-TILE_SIZE      = 32
-DISPLAY_WIDTH  = 12 * TILE_SIZE
-DISPLAY_HEIGHT = 10 * TILE_SIZE
-GLOBAL_OFFSET  = TILE_SIZE
-FONT_SIZE      = TILE_SIZE // 2
-SCORE_POS_X    = 9 * TILE_SIZE
-SCORE_POS_Y    = 1 * TILE_SIZE
 
 PIECES  = pygame.image.load('marbles.png')
 TILES   = pygame.image.load('marble.png')
 MOVES   = pygame.image.load('icons.png')
 DISPLAY = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 
-BLACK = 'X'
-WHITE = 'O'
 
 def run_game():
     pygame.init()
@@ -28,24 +20,67 @@ def run_game():
     game      = Reversi()
 
     while not game_over:
+        game.update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_over = True
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 get_input(game)
 
-        DISPLAY.fill((212, 208, 200))
+        draw(game)
+        clock.tick(60)
+        game_over = game_over or game.game_over
 
-        game.update()
-        draw_board(game.board.size, game.board.size)
-        draw_pieces(game)
-        draw_score(game)
-        draw_moves(game)
-        pygame.display.update()
-        clock.tick(30)
-
-    pygame.quit()
+    end_game(game)
     quit()
+
+
+def draw(game):
+    draw_board(game.board.size, game.board.size)
+    draw_pieces(game)
+    draw_score(game)
+    if game.board.turn is BLACK:
+        draw_moves(game)
+    draw_button(game)
+    draw_working(game)
+    pygame.display.update()
+
+
+def end_game(game):
+    score = game.score
+    winner = 'Black' if (score[BLACK] > score[WHITE]) else 'White'
+    if score[BLACK] == score[WHITE]:
+        winner = 'Nobody - Draw'
+
+    print('Game over!')
+    print('Score (black/white): {}/{}'.format(score[BLACK], score[WHITE]))
+    print('Winner is: {}'.format(winner))
+    pygame.time.wait(1500)
+    pygame.quit()
+
+
+def draw_button(game):
+    if game.hints:
+        DISPLAY.blit(MOVES, (SCORE_POS_X + TILE_SIZE // 4 + GLOBAL_OFFSET,
+                             SCORE_POS_Y - 1 * TILE_SIZE + GLOBAL_OFFSET),
+                            (0, 4 * ICON_SIZE, ICON_SIZE, ICON_SIZE))
+    else:
+        DISPLAY.blit(MOVES, (SCORE_POS_X + TILE_SIZE // 4 + GLOBAL_OFFSET,
+                             SCORE_POS_Y - 1 * TILE_SIZE + GLOBAL_OFFSET),
+                            (ICON_SIZE, 4 * ICON_SIZE, ICON_SIZE, ICON_SIZE))
+
+
+def draw_working(game):
+    if game.board.turn is BLACK:
+        DISPLAY.blit(MOVES, (SCORE_POS_X - 3 * ICON_SIZE // 2 + GLOBAL_OFFSET,
+                             SCORE_POS_Y  + ICON_SIZE // 2 + GLOBAL_OFFSET),
+                            (3 * ICON_SIZE, 4 * ICON_SIZE, ICON_SIZE, ICON_SIZE)
+                     )
+    else:
+        DISPLAY.blit(MOVES, (SCORE_POS_X - 3 * ICON_SIZE // 2 + GLOBAL_OFFSET,
+                             SCORE_POS_Y  + 5 * ICON_SIZE // 2 + GLOBAL_OFFSET),
+                            (3 * ICON_SIZE, 4 * ICON_SIZE, ICON_SIZE, ICON_SIZE)
+                     )
 
 
 def draw_score(game):
@@ -77,10 +112,19 @@ def get_input(game):
     col = (int(pos[0]) - GLOBAL_OFFSET) // TILE_SIZE + 1
 
     if click[0] == 1:
-        if not game.try_move((col, row)):
-            print('Not a valid move')
+        if not hint_button(game, col, row):
+            game.try_move((col, row))
     elif click[2] == 1:
         game.alpha_beta_search()
+
+
+def hint_button(game, col, row):
+    if col == 10 and row == 1:
+        game.hints = not game.hints
+        if game.hints:
+            game.alpha_beta_search()
+        return True
+    return False
 
 
 def draw_pieces(game):
@@ -98,13 +142,15 @@ def draw_moves(game):
     moves   = game.board.valid_moves()
     optimal = game.get_optimal_move()
     for m in moves:
-        if m == optimal:
+        if m == optimal and game.hints:
             draw_move((m[0] - 1) * TILE_SIZE, (m[1] - 1) * TILE_SIZE, True)
         else:
             draw_move((m[0] - 1) * TILE_SIZE, (m[1] - 1) * TILE_SIZE)
 
 
 def draw_tile(posx, posy, t_type):
+    posx += GLOBAL_OFFSET
+    posy += GLOBAL_OFFSET
     borders = {
         'border_topleft':    (1, 0),     'border_top':           (2, 0),
         'border_topright':   (3, 0),     'border_left':          (1, 1),
@@ -114,13 +160,11 @@ def draw_tile(posx, posy, t_type):
     }
 
     if t_type is 'dark':
-        DISPLAY.blit(TILES, (posx + GLOBAL_OFFSET, posy + GLOBAL_OFFSET),
-                     (0, TILE_SIZE, TILE_SIZE, TILE_SIZE))
+        DISPLAY.blit(TILES, (posx, posy), (0, TILE_SIZE, TILE_SIZE, TILE_SIZE))
     elif t_type is 'light':
-        DISPLAY.blit(TILES, (posx + GLOBAL_OFFSET, posy + GLOBAL_OFFSET),
-                     (0, 0, TILE_SIZE, TILE_SIZE))
+        DISPLAY.blit(TILES, (posx, posy), (0, 0, TILE_SIZE, TILE_SIZE))
     elif t_type in borders:
-        blit_tile(borders[t_type], (posx + GLOBAL_OFFSET, posy + GLOBAL_OFFSET))
+        blit_tile(borders[t_type], (posx, posy))
 
 
 def blit_tile(offset, pos):
@@ -134,21 +178,25 @@ def blit_tile(offset, pos):
 
 
 def draw_piece(posx, posy, color):
+    posx += GLOBAL_OFFSET
+    posy += GLOBAL_OFFSET
     if color is 'black':
-        DISPLAY.blit(PIECES, (posx + GLOBAL_OFFSET, posy + GLOBAL_OFFSET),
+        DISPLAY.blit(PIECES, (posx, posy),
                      (TILE_SIZE, 0, TILE_SIZE, TILE_SIZE))
     elif color is 'white':
-        DISPLAY.blit(PIECES, (posx + GLOBAL_OFFSET, posy + GLOBAL_OFFSET),
+        DISPLAY.blit(PIECES, (posx, posy),
                      (2 * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE))
 
 
 def draw_move(posx, posy, is_optimal=False):
+    posx += GLOBAL_OFFSET
+    posy += GLOBAL_OFFSET
     if is_optimal:
-         DISPLAY.blit(MOVES, (posx + GLOBAL_OFFSET + TILE_SIZE // 4, posy + GLOBAL_OFFSET + TILE_SIZE // 4),
-                      (2 * TILE_SIZE // 2, 2 * TILE_SIZE // 2, TILE_SIZE // 2, TILE_SIZE // 2))
+        DISPLAY.blit(MOVES, (posx + ICON_SIZE // 2, posy + ICON_SIZE // 2),
+                     (2 * ICON_SIZE, 2 * ICON_SIZE, ICON_SIZE, ICON_SIZE))
     else:
-        DISPLAY.blit(MOVES, (posx + GLOBAL_OFFSET + TILE_SIZE // 4, posy + GLOBAL_OFFSET + TILE_SIZE // 4),
-                     (TILE_SIZE // 2, 2 * TILE_SIZE // 2, TILE_SIZE // 2, TILE_SIZE // 2))
+        DISPLAY.blit(MOVES, (posx + ICON_SIZE // 2, posy + ICON_SIZE // 2),
+                     (ICON_SIZE, 2 * ICON_SIZE, ICON_SIZE, ICON_SIZE))
 
 
 def draw_board(cols, rows):
