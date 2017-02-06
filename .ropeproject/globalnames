@@ -1,7 +1,0 @@
-€}q(Ureversi]q(UNodeqUReversiqUreUreversiboard]q(UReversiBoardqUaddqeUgui]q(U	draw_moveq	Udraw_piecesq
-Uend_gameqUDISPLAYqUdraw_buttonqU
-draw_pieceqU	blit_tileqUMOVESqU
-draw_boardqUhint_buttonqUdrawqU
-draw_scoreqUPIECESqUdraw_workingqU	get_inputqUTILESqU
-draw_movesqUrun_gameqU	draw_textqU	draw_tileqeU	constants]q(UGLOBAL_OFFSETqU	FONT_SIZEqU
-BOARD_SIZEq USCORE_POS_Yq!USCORE_POS_Xq"UCUTOFF_DEPTHq#UDISPLAY_HEIGHTq$UBLACKq%U	ICON_SIZEq&U	TILE_SIZEq'UWHITEq(UDISPLAY_WIDTHq)UEMPTYq*eu.
