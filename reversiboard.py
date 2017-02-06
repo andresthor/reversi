@@ -185,10 +185,11 @@ class ReversiBoard(object):
         margin = '  ' if rows < 10 else '   '
 
         # Print top
+        letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
         top = margin + ' '
         for i in range(cols):
             space = ' ' if i < 9 else ''
-            top += ' ' + str(i+1) + '.' + space
+            top += ' ' + letters[i] + '.' + space
         print(top)
         print(margin + ' ' + cols * '+---' + '+')
 
