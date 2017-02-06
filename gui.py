@@ -1,9 +1,20 @@
 #! /usr/bin/env python
+# title           :gui.py
+# description     :Runs a GUI version of Reversi using pygame
+# author          :andresthor
+# date            :05-02-2017
+# usage           :python gui.py
+# python_version  :3.5.2
+# =============================================================================
 
 from constants import BLACK, WHITE, DISPLAY_HEIGHT, DISPLAY_WIDTH, GLOBAL_OFFSET
 from constants import SCORE_POS_X, SCORE_POS_Y, TILE_SIZE, FONT_SIZE, ICON_SIZE
 import pygame
 from reversi import Reversi
+
+# Graphics from:
+# http://opengameart.org/content/boardgame-tiles
+# http://opengameart.org/content/pixel-icons-0
 
 PIECES  = pygame.image.load('marbles.png')
 TILES   = pygame.image.load('marble.png')

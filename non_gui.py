@@ -1,17 +1,22 @@
 #! /usr/bin/env python
+# title           :non_gui.py
+# description     :Runs a cmd-line version of Reversi
+# author          :andresthor
+# date            :05-02-2017
+# usage           :python non_gui.py
+# python_version  :3.5.2
+# =============================================================================
 
 from reversi import Reversi
 from constants import BLACK, WHITE
-
 from cmd import Cmd
-
 
 INVALID_INPUT = '\n'.join(['Input should be in the form x#',
                            'where x is a lowercase letter between a-h',
                            'and # is a number between 1-8'])
 
 NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8]
-LETTERS = {'a': 1, 'b': 2, 'c': 3, 'd':4 , 'e': 5, 'f': 6, 'g': 7, 'h': 8}
+LETTERS = {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6, 'g': 7, 'h': 8}
 LET_LST = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
 
 

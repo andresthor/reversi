@@ -1,4 +1,10 @@
 #! /usr/bin/env python
+# title           :reversi.py
+# description     :A class that handles a game of reversi, complete with AI
+# author          :andresthor
+# date            :05-02-2017
+# python_version  :3.5.2
+# =============================================================================
 
 import reversiboard as rb
 from constants import BLACK, WHITE, EMPTY, BOARD_SIZE, CUTOFF_DEPTH

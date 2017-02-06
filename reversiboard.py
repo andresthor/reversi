@@ -1,4 +1,10 @@
 #! /usr/bin/env python
+# title           :reversiboard.py
+# description     :Creates and controls a Reversi game-board
+# author          :andresthor
+# date            :05-02-2017
+# python_version  :3.5.2
+# =============================================================================
 
 from constants import BLACK, WHITE, EMPTY
 
