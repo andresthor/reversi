@@ -10,6 +10,7 @@ import reversiboard as rb
 from constants import BLACK, WHITE, EMPTY, BOARD_SIZE, CUTOFF_DEPTH
 import random
 from copy import deepcopy
+from time import time
 
 
 class Node(object):
@@ -49,12 +50,25 @@ class Reversi(object):
 
         self.has_calculated = False
         self.game_over      = False
+        self.cutoff_depth   = CUTOFF_DEPTH
+
+	self.black_time     = 0
+	self.white_time     = 0
+        self.timer          = time()
+        self.black_last     = 0
+        self.white_last     = 0
 
     def try_move(self, tile):
         '''Tries to make a move at (tile[0], tile[1]) with the current board'''
 
-        self.score = self.board.score
-        return self.board.do_move(tile)
+	color = self.board.turn
+
+        success = self.board.do_move(tile)
+        if success:
+            self.score = self.board.score
+            self.update_timer(color)
+
+        return success
 
     def toggle_hints(self):
         '''Toggles the use of the alpha-beta-search when it's the player's turn.
@@ -136,6 +150,18 @@ class Reversi(object):
         self.has_calculated = False
         self.alpha_beta_search()
         self.try_move(self.root.action)
+
+    def update_timer(self, color):
+        print('Updted timer. Color is {}'.format(color))
+        turn_time = time() - self.timer
+        if color is BLACK:
+            self.black_last = turn_time
+            self.black_time += turn_time
+        elif color is WHITE:
+            self.white_last = turn_time
+            self.white_time += turn_time
+
+        self.timer = time()
 
     def result(self, state, action):
         '''Returns the transition model that defines the results of an
@@ -241,7 +267,7 @@ class Reversi(object):
             has reached a terminal state.
         '''
 
-        return depth >= CUTOFF_DEPTH or self.terminal_test(state, color)
+        return depth >= self.cutoff_depth or self.terminal_test(state, color)
 
     def terminal_test(self, state, color):
         '''Checks if a terminal state has been reached (no moves)'''
