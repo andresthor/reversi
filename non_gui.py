@@ -42,7 +42,7 @@ class ReversiCMD(Cmd):
 
     def postcmd(self, stop, line):
         if self.reversi.terminal_test(self.reversi.board,
-	                              self.reversi.board.turn):
+                                      self.reversi.board.turn):
             self.print_end_game()
             self.do_quit('')
         return Cmd.postcmd(self, stop, line)
@@ -85,28 +85,33 @@ class ReversiCMD(Cmd):
         print('Optimal move: {}{}'.format(LET_LST[move[0] - 1], move[1]))
 
     def do_cheat(self, line):
-	'''Make optimal move'''
+        '''Make optimal move'''
         if not self.reversi.hints:
             self.reversi.toggle_hints()
         self.reversi.alpha_beta_search()
 
-	move = self.reversi.get_optimal_move()
-	self.do_move(LET_LST[move[0] - 1] + str(move[1]))
+        move = self.reversi.get_optimal_move()
+        self.do_move(LET_LST[move[0] - 1] + str(move[1]))
 
     def do_show(self, line):
         '''Prints out the current game state'''
         self.print_board()
         self.print_info(self.get_last_computer_move(), self.reversi.board.turn)
 
-    def do_AI(self, line):
-        '''AI better OR AI worse\nMake AI better or worse'''
-        if line == 'better':
-            self.reversi.cutoff_depth += 1
-        elif line == 'worse':
-            self.reversi.cutoff_depth -= 1
+    def do_ai(self, line):
+        '''Set the maximum time (seconds) allowed for the AI to think'''
+        if not self._is_number(line) or (float(line) < 0.5):
+            print('Not a valid number.'
+                  ' Enter the maximum allowed time for the AI to think.')
+        else:
+            self.reversi.cutoff_time = float(line)
 
-	if self.reversi.cutoff_depth < 2:
-	    self.reversi.cutoff_depth = 2
+    def _is_number(self, n):
+        try:
+            float(n)
+            return True
+        except:
+            return False
 
     def get_last_computer_move(self):
         move = self.reversi.board.last
@@ -119,14 +124,14 @@ class ReversiCMD(Cmd):
 
     def print_info(self,  move, player):
         turn_time = 0
-	if player is BLACK:
+        if player is BLACK:
             print('Your move was {}{}'.format(move[0], move[1]))
             turn_time = self.reversi.black_last
         elif player is WHITE:
             print("The computer's move was {}{}".format(move[0], move[1]))
-	    turn_time = self.reversi.white_last
+            turn_time = self.reversi.white_last
 
-	print('Move took {:.3f}s'.format(turn_time))
+        print('Move took {:.3f}s'.format(turn_time))
         score = self.reversi.score
         print('Score is (black/white): {}/{}\n'.format(score[BLACK], score[WHITE]))
 
@@ -147,7 +152,7 @@ class ReversiCMD(Cmd):
 
         print('Game Over!')
         print('Time used (black/white): {:.3f}/{:.3f}'
-	      .format(self.reversi.black_time, self.reversi.white_time))
+              .format(self.reversi.black_time, self.reversi.white_time))
         print('Score (black/white): {}/{}'.format(score[BLACK], score[WHITE]))
         print('Winner: {}'.format(winner))
 

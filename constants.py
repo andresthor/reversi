@@ -6,8 +6,10 @@ BLACK = 'X'
 EMPTY = ' '
 
 # Game specific
-BOARD_SIZE   = 8
-CUTOFF_DEPTH = 4
+BOARD_SIZE    = 8
+CUTOFF_DEPTH  = 4
+CUTOFF_TIME   = 5.0
+CUTOFF_MARGIN = 0.3
 
 # GUI
 TILE_SIZE      = 32                     # Tiles used as base to build board

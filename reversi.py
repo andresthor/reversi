@@ -7,7 +7,8 @@
 # =============================================================================
 
 import reversiboard as rb
-from constants import BLACK, WHITE, EMPTY, BOARD_SIZE, CUTOFF_DEPTH
+from constants import BLACK, WHITE, EMPTY, BOARD_SIZE
+from constants import CUTOFF_DEPTH, CUTOFF_TIME, CUTOFF_MARGIN
 import random
 from copy import deepcopy
 from time import time
@@ -42,26 +43,28 @@ class Reversi(object):
     '''
 
     def __init__(self):
-        self.board = rb.ReversiBoard(BOARD_SIZE)
-        self.score = {BLACK: 2, WHITE: 2}
-        self.size  = BOARD_SIZE
-        self.root  = None
-        self.hints = False
-
-        self.has_calculated = False
+        self.board          = rb.ReversiBoard(BOARD_SIZE)
+        self.score          = {BLACK: 2, WHITE: 2}
+        self.size           = BOARD_SIZE
+        self.root           = None
         self.game_over      = False
-        self.cutoff_depth   = CUTOFF_DEPTH
 
-	self.black_time     = 0
-	self.white_time     = 0
+        self.hints          = False
+        self.has_calculated = False
+        self.time_cut       = True
+        self.cutoff_depth   = CUTOFF_DEPTH
+        self.cutoff_time    = CUTOFF_TIME
+
         self.timer          = time()
+        self.black_time     = 0
+        self.white_time     = 0
         self.black_last     = 0
         self.white_last     = 0
 
     def try_move(self, tile):
         '''Tries to make a move at (tile[0], tile[1]) with the current board'''
 
-	color = self.board.turn
+        color = self.board.turn
 
         success = self.board.do_move(tile)
         if success:
@@ -102,7 +105,6 @@ class Reversi(object):
             return self.root.action
         else:
             return None
-
 
     def optimal_moves(self):
         '''Returns a list of all optimal moves'''
@@ -152,7 +154,7 @@ class Reversi(object):
         self.try_move(self.root.action)
 
     def update_timer(self, color):
-        print('Updted timer. Color is {}'.format(color))
+        print('Updated timer. Color is {}'.format(color))
         turn_time = time() - self.timer
         if color is BLACK:
             self.black_last = turn_time
@@ -222,7 +224,7 @@ class Reversi(object):
         '''Performs a minimax search with alpha-beta pruning. Returns the action
            corresponding to the max of the min_value.
            Search ends when reaching a terminal state or when reaching the
-           cutoff depth
+           cutoff limit.
         '''
 
         depth += 1
@@ -244,7 +246,7 @@ class Reversi(object):
         '''Performs a minimax search with alpha-beta pruning. Returns the action
            corresponding to the min of the max_value.
            Search ends when reaching a terminal state or when reaching the
-           cutoff depth
+           cutoff limit.
         '''
 
         depth += 1
@@ -263,11 +265,17 @@ class Reversi(object):
         return v
 
     def cut_off_test(self, state, depth, color):
-        '''Returns True if the cutoff depth has been reached, or if the game
-            has reached a terminal state.
+        '''Returns True if the cutoff depth/time has been reached, or if the
+           game has reached a terminal state.
         '''
 
-        return depth >= self.cutoff_depth or self.terminal_test(state, color)
+        if not self.time_cut:
+            return depth >= self.cutoff_depth or self.terminal_test(state,
+                                                                    color)
+        elif (time() - self.timer) >= (self.cutoff_time - CUTOFF_MARGIN):
+            return True
+        else:
+            return self.terminal_test(state, color)
 
     def terminal_test(self, state, color):
         '''Checks if a terminal state has been reached (no moves)'''
