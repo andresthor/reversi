@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-# title           :non_gui.py
+# title           :cmd_line.py
 # description     :Runs a cmd-line version of Reversi
 # author          :andresthor
 # date            :05-02-2017
@@ -100,7 +100,7 @@ class ReversiCMD(Cmd):
 
     def do_ai(self, line):
         '''Set the maximum time (seconds) allowed for the AI to think'''
-        if not self._is_number(line) or (float(line) < 0.5):
+        if not self._is_number(line) or (float(line) < 1.0):
             print('Not a valid number.'
                   ' Enter the maximum allowed time for the AI to think.')
         else:
