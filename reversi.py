@@ -65,10 +65,11 @@ class Reversi(object):
     def try_move(self, tile):
         '''Tries to make a move at (tile[0], tile[1]) with the current board'''
 
+        color = self.board.turn
         success = self.board.do_move(tile)
         if success:
             self.score = self.board.score
-            self.update_timer(self.board.turn)
+            self.update_timer(color)
 
         return success
 
@@ -179,6 +180,7 @@ class Reversi(object):
             self.white_time += turn_time
 
         self.timer = time()
+        self.alpha_timer = self.timer
 
     def result(self, state, action):
         '''Returns the transition model that defines the results of an
