@@ -56,6 +56,7 @@ class Reversi(object):
         self.cutoff_time    = CUTOFF_TIME
 
         self.timer          = time()
+        self.alpha_timer    = time()
         self.black_time     = 0
         self.white_time     = 0
         self.black_last     = 0
@@ -65,7 +66,6 @@ class Reversi(object):
         '''Tries to make a move at (tile[0], tile[1]) with the current board'''
 
         color = self.board.turn
-
         success = self.board.do_move(tile)
         if success:
             self.score = self.board.score
@@ -77,7 +77,6 @@ class Reversi(object):
         '''Toggles the use of the alpha-beta-search when it's the player's turn.
            If True, the optimal move can then be fetched with get_optimal_move.
         '''
-
         self.hints = not self.hints
 
     def alpha_beta_search(self):
@@ -85,9 +84,25 @@ class Reversi(object):
            then retrievable with get_optimal_move
         '''
 
+        self.alpha_timer = time()
         self.root = Node(self.board)
         self.root.value = self.max_value(self.root, -float('inf'), float('inf'), 0)
         self.calc_optimal_move()
+
+        if not self.check_search_success():
+            self.repeat_search()
+
+    def repeat_search(self):
+        print('Alpha-beta search did not return a valid result.\n'
+              'It\'s possible the search value is too small: {}s'
+              .format(self.cutoff_time))
+        self.cutoff_time += 0.5
+        print('Search time increased to {}s'.format(self.cutoff_time))
+        self.alpha_beta_search()
+
+    def check_search_success(self):
+        '''Returns True if the search tree node has a valid action'''
+        return self.board.valid_move(self.root.action)
 
     def calc_optimal_move(self):
         '''Selects an optimal move after an alpha-beta search. If there are
@@ -154,7 +169,8 @@ class Reversi(object):
         self.try_move(self.root.action)
 
     def update_timer(self, color):
-        print('Updated timer. Color is {}'.format(color))
+        '''Updates the turn time for the appropriate player'''
+
         turn_time = time() - self.timer
         if color is BLACK:
             self.black_last = turn_time
@@ -164,6 +180,7 @@ class Reversi(object):
             self.white_time += turn_time
 
         self.timer = time()
+        self.alpha_timer = self.timer
 
     def result(self, state, action):
         '''Returns the transition model that defines the results of an
@@ -272,7 +289,7 @@ class Reversi(object):
         if not self.time_cut:
             return depth >= self.cutoff_depth or self.terminal_test(state,
                                                                     color)
-        elif (time() - self.timer) >= (self.cutoff_time - CUTOFF_MARGIN):
+        elif (time() - self.alpha_timer) >= (self.cutoff_time - CUTOFF_MARGIN):
             return True
         else:
             return self.terminal_test(state, color)
